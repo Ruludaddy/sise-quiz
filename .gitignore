@@ -1,0 +1,19 @@
+# 의존성 / 빌드 산출물
+node_modules/
+**/node_modules/
+**/dist/
+**/out/
+
+# 환경변수 (예제는 커밋)
+.env
+.env.*
+!**/.env.example
+
+# 앱인토스 CLI 캐시
+**/.ait/
+**/.granite/
+**/src/router.gen.ts
+
+# OS
+.DS_Store
+Thumbs.db

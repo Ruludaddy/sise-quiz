@@ -1,0 +1,10 @@
+node_modules
+dist
+*.local
+.DS_Store
+.env
+.env.*
+# 앱인토스 CLI 산출물 / 캐시
+.ait
+.granite
+src/router.gen.ts

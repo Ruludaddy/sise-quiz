@@ -1,0 +1,45 @@
+name: Build Mini App
+
+# 미니앱(ait/WebView) 번들을 CI에서 빌드해 dist 를 아티팩트로 올려요.
+# 이 아티팩트를 내려받아 앱인토스 콘솔에 업로드하면 돼요.
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', '.github/workflows/build-app.yml']
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install
+        working-directory: app
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: app
+        run: npm run typecheck
+
+      - name: Build
+        working-directory: app
+        env:
+          # 오늘의 문제 게시 URL (GitHub Pages). 리포지토리 Variables 에 등록해 주세요.
+          # 예: https://<owner>.github.io/<repo>
+          VITE_DAILY_ENDPOINT: ${{ vars.VITE_DAILY_ENDPOINT }}
+        run: npm run build
+
+      - name: Upload dist bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: miniapp-dist
+          path: app/dist
+          if-no-files-found: error

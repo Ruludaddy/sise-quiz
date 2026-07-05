@@ -1,0 +1,18 @@
+{
+  "name": "sise-quiz-daily-service",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "얼마일까? '오늘의 문제' 일일 생성 배치 (미니앱 번들과 분리 · 파트너 서버/크론에서 실행)",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "generate": "node generate-daily.mjs",
+    "generate:fallback": "DAILY_SOURCE=fallback node generate-daily.mjs",
+    "generate:kamis": "DAILY_SOURCE=kamis node generate-daily.mjs",
+    "generate:opinet": "DAILY_SOURCE=opinet node generate-daily.mjs",
+    "generate:datago": "DAILY_SOURCE=datago node generate-daily.mjs",
+    "probe:kamis": "node probe.mjs kamis",
+    "probe:opinet": "node probe.mjs opinet",
+    "probe:datago": "node probe.mjs datago"
+  }
+}

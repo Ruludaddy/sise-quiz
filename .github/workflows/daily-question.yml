@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: write # gh-pages 브랜치 푸시용
+  pages: write # Pages 빌드 트리거용
 
 jobs:
   generate:
@@ -55,3 +56,12 @@ jobs:
           publish_dir: daily-service/out
           publish_branch: gh-pages
           keep_files: true # 과거 {date}.json 유지
+
+      # Pages 자동 빌드가 가끔 지연돼서, 명시적으로 빌드를 깨워요.
+      - name: Trigger Pages build
+        run: |
+          curl -s -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pages/builds" \
+            -o /dev/null -w "pages build request: %{http_code}\n"

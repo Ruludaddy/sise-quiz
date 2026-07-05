@@ -11,6 +11,7 @@
     "generate:kamis": "DAILY_SOURCE=kamis node generate-daily.mjs",
     "generate:opinet": "DAILY_SOURCE=opinet node generate-daily.mjs",
     "generate:datago": "DAILY_SOURCE=datago node generate-daily.mjs",
+    "generate:bank": "node generate-questions.mjs",
     "probe:kamis": "node probe.mjs kamis",
     "probe:opinet": "node probe.mjs opinet",
     "probe:datago": "node probe.mjs datago"

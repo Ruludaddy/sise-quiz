@@ -34,6 +34,14 @@ jobs:
           # KAMIS_QUESTION: '오늘 배추 1포기 도매가는?'
         run: node generate-daily.mjs
 
+      - name: Generate main question bank (seed + KAMIS live)
+        working-directory: daily-service
+        env:
+          DATAGO_SERVICE_KEY: ${{ secrets.DATAGO_SERVICE_KEY }}
+          # 실시세로 섞을 KAMIS 프리셋(sources/kamis.mjs PRESETS 키). 콤마로 여러 개.
+          KAMIS_BANK_ITEMS: rice
+        run: node generate-questions.mjs
+
       - name: Publish to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v4
         with:

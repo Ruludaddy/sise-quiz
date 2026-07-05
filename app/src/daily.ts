@@ -42,6 +42,30 @@ function toQuestion(d: DailyQuestion): Question {
   };
 }
 
+/**
+ * 메인 게임 문제 은행(questions.json)을 불러와요. (자체 제작 + 실시세 혼합)
+ * 실패 시 throw → 호출부에서 번들 POOL로 폴백.
+ */
+export async function fetchQuestionBank(): Promise<Question[]> {
+  const res = await fetch(`${ENDPOINT}/questions.json`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('question bank fetch failed');
+  const data: unknown = await res.json();
+  const list = (data as { questions?: unknown[] })?.questions;
+  if (!Array.isArray(list)) throw new Error('invalid bank');
+
+  const out: Question[] = [];
+  for (const raw of list) {
+    const it = raw as { q?: unknown; a?: unknown; diff?: unknown };
+    if (typeof it.q === 'string' && it.q.length > 0 && typeof it.a === 'number' && it.a > 0) {
+      const a = it.a;
+      const diff = it.diff === 1 || it.diff === 2 || it.diff === 3 ? it.diff : undefined;
+      out.push({ q: it.q, a, min: Math.max(1, Math.floor(a * 0.2)), max: Math.ceil(a * 3), diff });
+    }
+  }
+  if (out.length < 5) throw new Error('bank too small');
+  return out;
+}
+
 export async function fetchTodayQuestion(): Promise<Question> {
   const date = await getTodayKey();
   const candidates = [`${ENDPOINT}/${date}.json`, `${ENDPOINT}/today.json`];

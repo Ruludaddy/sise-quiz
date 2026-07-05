@@ -5,7 +5,7 @@ import { FEATURES, AD_CONFIG } from './features';
 import { showRewardedGate, maybeShowInterstitial } from './toss/ads';
 import { initSoundLifecycle, setSoundEnabled } from './sound';
 import { getUserKey, askReview, Store } from './toss/sdk';
-import { fetchTodayQuestion } from './daily';
+import { fetchTodayQuestion, fetchQuestionBank } from './daily';
 import { useSafeArea } from './toss/useSafeArea';
 import { isTodayDone, markTodayDone, getBestAverage, saveBestAverage } from './persist';
 import { HomeScreen } from './screens/HomeScreen';
@@ -36,11 +36,13 @@ export default function App() {
   const [dailyLoading, setDailyLoading] = useState(false);
   const [adLoading, setAdLoading] = useState(false);
   const [sessionPlays, setSessionPlays] = useState(0); // 세션 내 '가격 맞히기' 플레이 수 (리워드 게이트 기준)
+  const [bank, setBank] = useState<Question[]>([]); // 서버 문제 은행 (실패 시 번들 POOL 폴백)
 
   // 앱 시작 시 1회: 라이프사이클/식별키/저장값 로드
   useEffect(() => {
     initSoundLifecycle();
     void getUserKey(); // 사용자 식별키 워밍업 (비게임: getAnonymousKey)
+    void fetchQuestionBank().then(setBank).catch(() => {}); // 문제 은행 로드 (실패 시 POOL 폴백)
 
     (async () => {
       const [done, best] = await Promise.all([isTodayDone(), getBestAverage()]);
@@ -80,7 +82,8 @@ export default function App() {
 
     setSessionPlays((n) => n + 1);
     setMode('main');
-    setQList(pick5(POOL));
+    // 서버 문제 은행이 있으면 그걸로, 없으면 번들 POOL로 5문제 샘플
+    setQList(pick5(bank.length >= 5 ? bank : POOL));
     setQIdx(0);
     setScores([]);
     setScreen('question');

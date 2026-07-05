@@ -53,11 +53,11 @@ const num = (v) => {
   return Number.isFinite(n) ? n : NaN;
 };
 
-export async function getKamisQuestion(date /* 'YYYY-MM-DD' */) {
+export async function getKamisQuestion(date /* 'YYYY-MM-DD' */, itemKey) {
   const key = process.env.DATAGO_SERVICE_KEY;
   if (!key) throw new Error('DATAGO_SERVICE_KEY 필요 (공공데이터포털 인증키)');
 
-  const preset = PRESETS[process.env.KAMIS_ITEM || 'rice'] || PRESETS.rice;
+  const preset = PRESETS[itemKey || process.env.KAMIS_ITEM || 'rice'] || PRESETS.rice;
   const codes = {
     se_cd: process.env.KAMIS_SE_CD || preset.se_cd,
     ctgry_cd: process.env.KAMIS_CTGRY_CD || preset.ctgry_cd,

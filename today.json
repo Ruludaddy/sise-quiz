@@ -1,0 +1,11 @@
+{
+  "date": "2026-07-05",
+  "question": "오늘 쌀 20kg 도매가는?",
+  "answer": 59000,
+  "unit": "원",
+  "min": 29500,
+  "max": 118000,
+  "source": "KAMIS 농산물유통정보(공공데이터포털)",
+  "sourceUrl": "https://www.kamis.or.kr",
+  "note": "2026-06-30 · 양곡도매 · 상품 · 중도매"
+}

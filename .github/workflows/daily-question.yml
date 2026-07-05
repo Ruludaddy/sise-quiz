@@ -8,6 +8,12 @@ on:
     # 매일 00:10 KST (UTC 15:10). 하루 시작에 today.json 을 미리 만들어 둬요.
     - cron: '10 15 * * *'
   workflow_dispatch: {} # 콘솔에서 수동 실행 가능
+  push:
+    branches: [main]
+    # 문제 시드/생성 로직을 push 하면 곧바로 재생성·재게시해요. (푸시 → 몇 분 뒤 반영)
+    paths:
+      - 'daily-service/**'
+      - '.github/workflows/daily-question.yml'
 
 permissions:
   contents: write # gh-pages 브랜치 푸시용

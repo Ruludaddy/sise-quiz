@@ -10,6 +10,9 @@ import {
   Storage as TossStorage,
   getServerTime,
   requestReview as tossRequestReview,
+  share as tossShare,
+  getTossShareLink,
+  graniteEvent,
 } from '@apps-in-toss/web-framework';
 
 // ---- 로컬 폴백 저장소 (토스 Storage 불가 시) ----
@@ -110,5 +113,57 @@ export async function askReview(): Promise<void> {
     await tossRequestReview();
   } catch {
     /* 노출 실패는 무시 — 흐름에 영향 주지 않아요 */
+  }
+}
+
+// ---- 결과 공유 (토스 공유 시트 → 웹 공유 → 클립보드 순 폴백) ----
+// intoss:// 딥링크는 정식 출시된 앱에서만 열려요. (granite.config.ts appName과 일치해야 함)
+const APP_DEEPLINK = 'intoss://sise-quiz';
+const OG_IMAGE = 'https://static.toss.im/appsintoss/56207/51b2a2f7-254e-4b05-a036-dfe573653065.png';
+
+export type ShareOutcome = 'shared' | 'copied' | 'cancelled' | 'failed';
+
+export async function shareText(text: string): Promise<ShareOutcome> {
+  let message = text;
+  try {
+    const link = await getTossShareLink(APP_DEEPLINK, OG_IMAGE);
+    if (typeof link === 'string' && link.length > 0) message = `${text}\n${link}`;
+  } catch {
+    /* 링크 생성 실패 시 텍스트만 공유 */
+  }
+  try {
+    await tossShare({ message });
+    return 'shared';
+  } catch {
+    /* 토스 환경 아님 → 웹 폴백 */
+  }
+  try {
+    if (typeof navigator.share === 'function') {
+      await navigator.share({ text: message });
+      return 'shared';
+    }
+  } catch (e) {
+    // 사용자가 시트를 직접 닫은 경우만 조용히 종료 — 실제 실패는 클립보드로 폴백
+    if (e instanceof DOMException && e.name === 'AbortError') return 'cancelled';
+  }
+  try {
+    await navigator.clipboard.writeText(message);
+    return 'copied';
+  } catch {
+    return 'failed';
+  }
+}
+
+// ---- 안드로이드 뒤로가기 구독 (토스 환경 아니면 no-op, 반환값은 해제 함수) ----
+export function onBackEvent(handler: () => void): () => void {
+  try {
+    return graniteEvent.addEventListener('backEvent', {
+      onEvent: handler,
+      onError: () => {
+        /* 이벤트 오류는 무시 — 기본 뒤로가기로 동작 */
+      },
+    });
+  } catch {
+    return () => {};
   }
 }

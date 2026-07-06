@@ -1,12 +1,20 @@
 interface HomeScreenProps {
   todayDone: boolean;
   dailyLoading?: boolean;
+  bestAvg?: number;
   onStart: () => void;
   onToday: () => void;
   onOpenSettings: () => void;
 }
 
-export function HomeScreen({ todayDone, dailyLoading = false, onStart, onToday, onOpenSettings }: HomeScreenProps) {
+export function HomeScreen({
+  todayDone,
+  dailyLoading = false,
+  bestAvg = 0,
+  onStart,
+  onToday,
+  onOpenSettings,
+}: HomeScreenProps) {
   const todayDesc = dailyLoading
     ? '불러오는 중…'
     : todayDone
@@ -32,6 +40,12 @@ export function HomeScreen({ todayDone, dailyLoading = false, onStart, onToday, 
             가격 맞히기 시작하기
           </button>
         </div>
+
+        {bestAvg > 0 && (
+          <div className="stat-row">
+            🏆 내 최고 시세 감각 <b>{bestAvg}점</b>
+          </div>
+        )}
 
         <div className="section-label">보너스</div>
         <div

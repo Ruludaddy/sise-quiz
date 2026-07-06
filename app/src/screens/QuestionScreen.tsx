@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Question } from '../logic';
-import { won, scoreOf, fbOf } from '../logic';
+import { won, scoreOf, fbOf, errPctOf } from '../logic';
 import { beep, beepForScore, ensureAudio } from '../sound';
 
 interface QuestionScreenProps {
@@ -8,8 +8,8 @@ interface QuestionScreenProps {
   index: number; // 0-based
   total: number;
   mode: 'main' | 'today';
-  /** 정답 공개 시점에 점수를 전달 (App이 scores에 누적) */
-  onReveal: (score: number) => void;
+  /** 정답 공개 시점에 점수·내 답을 전달 (App이 scores/guesses에 누적) */
+  onReveal: (score: number, guess: number) => void;
   /** 다음 문제 또는 결과로 진행 */
   onAdvance: () => void;
 }
@@ -48,7 +48,7 @@ export function QuestionScreen({ item, index, total, mode, onReveal, onAdvance }
     setScore(s);
     setRevealed(true);
     beepForScore(s);
-    onReveal(s);
+    onReveal(s, value);
   };
 
   const footLabel = revealed ? (isToday || isLast ? '결과 보기' : '다음 문제') : '정답 확인';
@@ -77,8 +77,19 @@ export function QuestionScreen({ item, index, total, mode, onReveal, onAdvance }
                 실제 가격<b>{won(item.a)}</b>
               </div>
               <div className={`score ${feedback.cls}`}>{score}점</div>
-              <div className={`fb ${feedback.cls}`}>
-                {feedback.text} · 내 예상 {won(value)}
+              <div className={`fb ${feedback.cls}`}>{feedback.text}</div>
+              <div className="err-line">
+                내 예상 {won(value)} ·{' '}
+                {value === item.a
+                  ? '정확히 맞혔어요! 🎯'
+                  : errPctOf(value, item.a) === 0
+                    ? '거의 정확해요! 🎯'
+                    : value > item.a
+                      ? `${errPctOf(value, item.a)}% 높게 불렀어요 ▲`
+                      : `${errPctOf(value, item.a)}% 낮게 불렀어요 ▼`}
+              </div>
+              <div className="acc-bar">
+                <span className={`acc-fill ${feedback.cls}`} style={{ width: `${score}%` }} />
               </div>
             </div>
           )}
